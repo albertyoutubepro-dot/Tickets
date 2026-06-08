@@ -25,17 +25,23 @@ class TicketCategorySelect(discord.ui.Select):
         options = []
         for category_name, emoji in categories:
             try:
-                display_emoji = "🎫"
+                select_emoji = None
                 if emoji and emoji.strip():
-                    if emoji.startswith('<:') and emoji.endswith('>') and ':' in emoji:
-                        display_emoji = emoji
-                    elif len(emoji) <= 4 and not emoji.startswith('<'):
-                        display_emoji = emoji
-                
+                    e = emoji.strip()
+                    if e.startswith('<:') and e.endswith('>') and ':' in e:
+                        select_emoji = e
+                    else:
+                        import unicodedata
+                        try:
+                            if unicodedata.category(e[0]) in ('So', 'Sm', 'Sk') or ord(e[0]) > 0x1F300:
+                                select_emoji = e[0]
+                        except Exception:
+                            pass
+
                 options.append(discord.SelectOption(
                     label=category_name,
                     value=category_name,
-                    emoji=display_emoji,
+                    emoji=select_emoji,
                     description=f"Create a {category_name.lower()} ticket"
                 ))
             except Exception as e:
@@ -43,7 +49,6 @@ class TicketCategorySelect(discord.ui.Select):
                 options.append(discord.SelectOption(
                     label=category_name,
                     value=category_name,
-                    emoji="🎫",
                     description=f"Create a {category_name.lower()} ticket"
                 ))
 
